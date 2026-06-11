@@ -1,2 +1,5 @@
 [build]
-functions = "netlify/functions"
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+  functions = "../netlify/functions"
