@@ -13,6 +13,27 @@ export async function handler() {
     );
 
     const data = await response.json();
+	
+	const cleanData = data.results.map(item => {
+
+		const props = item.properties;
+
+		return {
+
+			name:
+				props.Name?.title?.[0]?.plain_text ?? "",
+
+			date:
+				props.Time?.date?.start ?? "",
+
+			tag:
+				props["標籤"]?.select?.name ?? "",
+
+			mapUrl:
+				props["google map連結"]?.url ?? ""
+
+		};
+	});
 
     return {
         statusCode: 200,
