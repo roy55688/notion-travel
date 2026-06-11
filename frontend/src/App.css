@@ -275,3 +275,23 @@ h1 {
     border-radius: 20px;
   }
 }
+
+.image-block {
+  margin: 18px 0;
+}
+
+.image-block figcaption {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #9a8790;
+}
+
+.content-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 18px;
+  margin-top: 14px;
+  box-shadow: 0 8px 20px rgba(132, 92, 105, 0.16);
+}

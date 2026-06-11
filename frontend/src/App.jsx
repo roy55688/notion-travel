@@ -173,15 +173,19 @@ function App() {
                 }
 
                 if (block.type === "image" && block.url) {
-                  return (
-                    <img
-                      key={index}
-                      src={block.url}
-                      alt=""
-                      className="content-image"
-                    />
-                  );
-                }
+				  return (
+					<figure key={index} className="image-block">
+					  <img
+						src={block.url}
+						alt={block.caption || ""}
+						className="content-image"
+					  />
+					  {block.caption && (
+						<figcaption>{block.caption}</figcaption>
+					  )}
+					</figure>
+				  );
+				}
 
                 return null;
               })}
