@@ -75,7 +75,8 @@ function App() {
 
   const grouped = groupByDate(items);
   const dates = Object.keys(grouped).sort();
-  const dayItems = grouped[selectedDate] || [];
+  const dayItems = [...(grouped[selectedDate] || [])]
+    .sort((a, b) => a.order - b.order);
 
   if (loading) {
     return (

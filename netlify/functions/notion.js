@@ -26,6 +26,8 @@ export async function handler() {
 
             tag: props["標籤"]?.select?.name ?? "",
 
+            order: props.Order?.number ?? 9999,
+
             mapUrl: props["google map連結"]?.url ?? ""
         };
     });
