@@ -1,82 +1,277 @@
-body {
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #f6f6f6;
-  color: #222;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, #ffe1ec 0, transparent 28%),
+    radial-gradient(circle at top right, #d8f3ff 0, transparent 30%),
+    linear-gradient(180deg, #fff8fb 0%, #f5fbff 100%);
+  color: #3a2f35;
+}
+
+button,
+a {
+  font: inherit;
 }
 
 .page {
-  max-width: 1000px;
+  width: 100%;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 20px;
 }
 
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  margin-bottom: 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 32px rgba(255, 154, 188, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff7aa8;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: #7a6d73;
+}
+
+.hero-emoji {
+  font-size: 44px;
+}
+
 .date-tabs {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
-  margin-bottom: 20px;
+  padding: 4px 2px 14px;
+  margin-bottom: 10px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .date-tabs button {
+  flex: 0 0 auto;
+  min-width: 88px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 18px;
   padding: 10px 14px;
-  background: white;
+  background: rgba(255, 255, 255, 0.86);
+  color: #6b5d63;
+  box-shadow: 0 6px 16px rgba(134, 96, 112, 0.12);
   cursor: pointer;
-  white-space: nowrap;
+}
+
+.date-tabs button span {
+  display: block;
+  font-weight: 800;
+}
+
+.date-tabs button small {
+  display: block;
+  margin-top: 3px;
+  color: #a1949b;
 }
 
 .date-tabs button.active {
-  background: #222;
+  background: linear-gradient(135deg, #ff8db8, #ffc56e);
   color: white;
 }
 
-.layout {
+.date-tabs button.active small {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.content {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 1.1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.list,
+.detail {
+  min-width: 0;
+}
+
+.list h2 {
+  margin: 8px 0 14px;
+  font-size: 20px;
 }
 
 .card {
-  background: white;
-  border-radius: 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px;
   margin-bottom: 12px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 8px 22px rgba(132, 92, 105, 0.12);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 2px solid transparent;
+}
+
+.card.selected {
+  border-color: #ff9ec2;
+  background: #fff2f7;
 }
 
 .card-title {
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .tag {
-  display: inline-block;
-  font-size: 13px;
-  background: #eee;
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
-  padding: 4px 8px;
-  margin-bottom: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  background: #ffe3ee;
+  color: #d94c82;
+}
+
+.card a {
+  color: #4b91d9;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.card-arrow {
+  align-self: center;
+  font-size: 28px;
+  color: #d8a0b5;
 }
 
 .detail {
-  background: white;
-  border-radius: 16px;
+  position: sticky;
+  top: 16px;
   padding: 20px;
-  min-height: 300px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 32px rgba(132, 92, 105, 0.14);
+}
+
+.detail-header {
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px dashed #f0bfd1;
+}
+
+.detail-date {
+  margin: 0 0 6px;
+  color: #ff7aa8;
+  font-weight: 800;
+}
+
+.detail h2 {
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+
+.paragraph,
+.note {
+  line-height: 1.8;
+  font-size: 16px;
+  color: #5c5056;
 }
 
 .content-image {
+  display: block;
+  width: 100%;
   max-width: 100%;
-  border-radius: 12px;
-  margin-top: 12px;
+  border-radius: 18px;
+  margin-top: 14px;
+}
+
+.empty-detail {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #8c7d84;
+}
+
+.empty-emoji {
+  font-size: 46px;
+  margin-bottom: 8px;
+}
+
+.loading-card {
+  margin-top: 40px;
+  padding: 24px;
+  border-radius: 24px;
+  background: white;
+  box-shadow: 0 10px 28px rgba(132, 92, 105, 0.14);
+  text-align: center;
+  font-weight: 800;
 }
 
 @media (max-width: 760px) {
-  .layout {
-    grid-template-columns: 1fr;
+  .page {
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  .hero-emoji {
+    font-size: 36px;
+  }
+
+  .content {
+    display: block;
+  }
+
+  .detail {
+    position: static;
+    margin-top: 18px;
+  }
+
+  .card {
+    border-radius: 20px;
   }
 }

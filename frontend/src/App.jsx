@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const API_BASE = "";
-
 function groupByDate(items) {
   return items.reduce((groups, item) => {
     const date = item.date || "未分類";
@@ -10,6 +8,16 @@ function groupByDate(items) {
     groups[date].push(item);
     return groups;
   }, {});
+}
+
+function formatDate(dateText) {
+  if (dateText === "未分類") return "未分類";
+  const date = new Date(dateText);
+  return date.toLocaleDateString("zh-TW", {
+    month: "numeric",
+    day: "numeric",
+    weekday: "short"
+  });
 }
 
 function App() {
@@ -22,7 +30,7 @@ function App() {
 
   useEffect(() => {
     async function loadTrips() {
-      const res = await fetch(`${API_BASE}/.netlify/functions/notion`);
+      const res = await fetch("/.netlify/functions/notion");
       const data = await res.json();
 
       setItems(data);
@@ -39,12 +47,29 @@ function App() {
   async function openItem(item) {
     setSelectedItem(item);
     setDetailLoading(true);
+    setPageContent([]);
 
-    const res = await fetch(`${API_BASE}/.netlify/functions/page?id=${item.id}`);
-    const data = await res.json();
+    try {
+      const res = await fetch(`/.netlify/functions/page?id=${item.id}`);
+      const data = await res.json();
 
-    setPageContent(data.content || []);
-    setDetailLoading(false);
+      // 兼容兩種格式：
+      // 1. { pageId, content: [...] }
+      // 2. [...]
+      const content = Array.isArray(data) ? data : data.content || [];
+
+      setPageContent(content);
+    } catch (error) {
+      console.error(error);
+      setPageContent([
+        {
+          type: "paragraph",
+          text: "內容載入失敗"
+        }
+      ]);
+    } finally {
+      setDetailLoading(false);
+    }
   }
 
   const grouped = groupByDate(items);
@@ -52,14 +77,25 @@ function App() {
   const dayItems = grouped[selectedDate] || [];
 
   if (loading) {
-    return <div className="page">載入行程中...</div>;
+    return (
+      <main className="page">
+        <div className="loading-card">行程載入中 ✈️</div>
+      </main>
+    );
   }
 
   return (
-    <div className="page">
-      <h1>旅行行程</h1>
+    <main className="page">
+      <header className="hero">
+        <div>
+          <p className="eyebrow">Travel Planner</p>
+          <h1>我的旅行行程</h1>
+          <p className="subtitle">從 Notion 同步，手機友善查看</p>
+        </div>
+        <div className="hero-emoji">🧳</div>
+      </header>
 
-      <div className="date-tabs">
+      <nav className="date-tabs">
         {dates.map(date => (
           <button
             key={date}
@@ -70,52 +106,73 @@ function App() {
               setPageContent([]);
             }}
           >
-            {date}
+            <span>{formatDate(date)}</span>
+            <small>{grouped[date].length} 項</small>
           </button>
         ))}
-      </div>
+      </nav>
 
-      <div className="layout">
-        <section className="list">
+      <section className="content">
+        <div className="list">
+          <h2>{formatDate(selectedDate)} 行程</h2>
+
           {dayItems.map(item => (
-            <div
+            <article
               key={item.id}
-              className="card"
+              className={`card ${selectedItem?.id === item.id ? "selected" : ""}`}
               onClick={() => openItem(item)}
             >
-              <div className="card-title">{item.name}</div>
+              <div className="card-main">
+                <div className="card-title">{item.name}</div>
 
-              {item.tag && <div className="tag">{item.tag}</div>}
+                <div className="card-meta">
+                  {item.tag && <span className="tag">{item.tag}</span>}
+                  {item.mapUrl && (
+                    <a
+                      href={item.mapUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={e => e.stopPropagation()}
+                    >
+                      🗺️ 地圖
+                    </a>
+                  )}
+                </div>
+              </div>
 
-              {item.mapUrl && (
-                <a
-                  href={item.mapUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={e => e.stopPropagation()}
-                >
-                  Google Map
-                </a>
-              )}
-            </div>
+              <div className="card-arrow">›</div>
+            </article>
           ))}
-        </section>
+        </div>
 
-        <section className="detail">
-          {!selectedItem && <p>請選擇一個行程項目</p>}
+        <aside className="detail">
+          {!selectedItem && (
+            <div className="empty-detail">
+              <div className="empty-emoji">🌷</div>
+              <p>點選左邊的行程項目查看筆記</p>
+            </div>
+          )}
 
           {selectedItem && (
             <>
-              <h2>{selectedItem.name}</h2>
+              <div className="detail-header">
+                <p className="detail-date">{formatDate(selectedItem.date || "未分類")}</p>
+                <h2>{selectedItem.name}</h2>
+                {selectedItem.tag && <span className="tag">{selectedItem.tag}</span>}
+              </div>
 
-              {detailLoading && <p>載入內容中...</p>}
+              {detailLoading && <p className="note">筆記載入中...</p>}
+
+              {!detailLoading && pageContent.length === 0 && (
+                <p className="note">這個項目目前沒有筆記內容</p>
+              )}
 
               {!detailLoading && pageContent.map((block, index) => {
                 if (block.type === "paragraph") {
-                  return <p key={index}>{block.text}</p>;
+                  return block.text ? <p key={index} className="paragraph">{block.text}</p> : null;
                 }
 
-                if (block.type === "image") {
+                if (block.type === "image" && block.url) {
                   return (
                     <img
                       key={index}
@@ -130,9 +187,9 @@ function App() {
               })}
             </>
           )}
-        </section>
-      </div>
-    </div>
+        </aside>
+      </section>
+    </main>
   );
 }
 
