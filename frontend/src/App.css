@@ -295,3 +295,73 @@ h1 {
   margin-top: 14px;
   box-shadow: 0 8px 20px rgba(132, 92, 105, 0.16);
 }
+
+.image-button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px;
+  background: rgba(45, 35, 42, 0.82);
+  backdrop-filter: blur(8px);
+}
+
+.image-modal-img {
+  max-width: min(96vw, 1100px);
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.image-modal-caption {
+  max-width: min(92vw, 900px);
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #5c5056;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.image-modal-close {
+  position: fixed;
+  top: 14px;
+  right: 16px;
+  z-index: 10000;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #3a2f35;
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 760px) {
+  .image-modal {
+    padding: 10px;
+  }
+
+  .image-modal-img {
+    max-width: 96vw;
+    max-height: 80vh;
+    border-radius: 14px;
+  }
+}

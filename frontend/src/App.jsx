@@ -25,6 +25,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedItem, setSelectedItem] = useState(null);
   const [pageContent, setPageContent] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -175,11 +176,18 @@ function App() {
                 if (block.type === "image" && block.url) {
 				  return (
 					<figure key={index} className="image-block">
-					  <img
-						src={block.url}
-						alt={block.caption || ""}
-						className="content-image"
-					  />
+					  <button
+						type="button"
+						className="image-button"
+						onClick={() => setPreviewImage(block)}
+					  >
+						<img
+						  src={block.url}
+						  alt={block.caption || ""}
+						  className="content-image"
+						/>
+					  </button>
+
 					  {block.caption && (
 						<figcaption>{block.caption}</figcaption>
 					  )}
@@ -193,6 +201,36 @@ function App() {
           )}
         </aside>
       </section>
+	  {previewImage && (
+		  <div
+			className="image-modal"
+			onClick={() => setPreviewImage(null)}
+		  >
+			<button
+			  type="button"
+			  className="image-modal-close"
+			  onClick={() => setPreviewImage(null)}
+			>
+			  ×
+			</button>
+
+			<img
+			  src={previewImage.url}
+			  alt={previewImage.caption || ""}
+			  className="image-modal-img"
+			  onClick={e => e.stopPropagation()}
+			/>
+
+			{previewImage.caption && (
+			  <div
+				className="image-modal-caption"
+				onClick={e => e.stopPropagation()}
+			  >
+				{previewImage.caption}
+			  </div>
+			)}
+		  </div>
+		)}
     </main>
   );
 }
