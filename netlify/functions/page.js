@@ -15,8 +15,25 @@ export async function handler(event) {
 
     const data = await response.json();
 
+    const content = data.results.map(block => {
+
+        if (block.type === "paragraph") {
+
+            return {
+                type: "paragraph",
+                text: block.paragraph.rich_text
+                    .map(t => t.plain_text)
+                    .join("")
+            };
+        }
+
+        return {
+            type: block.type
+        };
+    });
+
     return {
         statusCode: 200,
-        body: JSON.stringify(data)
+        body: JSON.stringify(content)
     };
 }
