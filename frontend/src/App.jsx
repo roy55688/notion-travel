@@ -150,8 +150,10 @@ function App() {
         <aside className="detail">
           {!selectedItem && (
             <div className="empty-detail">
-              <div className="empty-emoji">🌷</div>
-              <p>點選左邊的行程項目查看筆記</p>
+              <div className="empty-emoji">🗺️</div>
+              <p>
+                點選<span className="desktop-only">左側</span><span className="mobile-only">上方</span>的行程項目查看筆記
+              </p>
             </div>
           )}
 

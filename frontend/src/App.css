@@ -233,6 +233,10 @@ h1 {
   margin-bottom: 8px;
 }
 
+.mobile-only {
+  display: none;
+}
+
 .loading-card {
   margin-top: 40px;
   padding: 24px;
@@ -244,6 +248,14 @@ h1 {
 }
 
 @media (max-width: 760px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: inline;
+  }
+
   .page {
     padding: 12px;
     overflow-x: hidden;
