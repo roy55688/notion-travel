@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import { cachePage, getCachedPage } from "./pageCache.js";
 
 function groupByDate(items) {
   return items.reduce((groups, item) => {
@@ -47,6 +48,14 @@ function App() {
 
   async function openItem(item) {
     setSelectedItem(item);
+
+    const cachedContent = getCachedPage(item.id);
+    if (cachedContent) {
+      setPageContent(cachedContent);
+      setDetailLoading(false);
+      return;
+    }
+
     setDetailLoading(true);
     setPageContent([]);
 
@@ -59,6 +68,7 @@ function App() {
       // 2. [...]
       const content = Array.isArray(data) ? data : data.content || [];
 
+      cachePage(item.id, content);
       setPageContent(content);
     } catch (error) {
       console.error(error);

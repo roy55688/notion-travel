@@ -53,6 +53,10 @@ export async function handler(event) {
 
   return {
     statusCode: 200,
+    headers: {
+      "Netlify-CDN-Cache-Control": "public, durable, max-age=300, stale-while-revalidate=60",
+      "Cache-Control": "public, max-age=0, must-revalidate"
+    },
     body: JSON.stringify({
       pageId,
       content
