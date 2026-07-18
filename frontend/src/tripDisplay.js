@@ -13,6 +13,21 @@ export function formatTripDate(dateText) {
   });
 }
 
+export function getInitialTripDate(
+  dates,
+  pathname = "/",
+  today = new Intl.DateTimeFormat("en-CA").format(new Date())
+) {
+  const firstDate = dates[0] || "";
+  const pathDate = pathname.match(/^\/(\d{4}-\d{2}-\d{2})\/?$/)?.[1];
+
+  if (pathname && pathname !== "/") {
+    return pathDate && dates.includes(pathDate) ? pathDate : firstDate;
+  }
+
+  return dates.includes(today) ? today : firstDate;
+}
+
 export function getTicketStatusTone(status) {
   switch (status) {
     case "已預定":
@@ -24,8 +39,4 @@ export function getTicketStatusTone(status) {
     default:
       return "unset";
   }
-}
-
-export function getTicketStatusLabel(status) {
-  return status || "未設定";
 }

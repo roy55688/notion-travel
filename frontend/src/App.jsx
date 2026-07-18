@@ -4,7 +4,7 @@ import { cachePage, getCachedPage } from "./pageCache.js";
 import {
   EMPTY_DATE_LABEL,
   formatTripDate,
-  getTicketStatusLabel,
+  getInitialTripDate,
   getTicketStatusTone
 } from "./tripDisplay.js";
 
@@ -18,12 +18,14 @@ function groupByDate(items) {
 }
 
 function TicketReservation({ status, reservationTime }) {
+  if (!status) return null;
+
   const tone = getTicketStatusTone(status);
 
   return (
     <>
       <span className={`ticket-status ticket-status--${tone}`}>
-        🎟️ {getTicketStatusLabel(status)}
+        🎟️ {status}
       </span>
 
       {status === "已預定" && (
@@ -57,7 +59,7 @@ function App() {
         setItems(data);
 
         const dates = [...new Set(data.map(x => x?.date || EMPTY_DATE_LABEL))].sort();
-        setSelectedDate(dates[0] || "");
+        setSelectedDate(getInitialTripDate(dates, window.location.pathname));
       } catch (error) {
         console.error(error);
         setItems([]);
