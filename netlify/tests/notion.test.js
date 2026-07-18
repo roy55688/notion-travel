@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { transformNotionItem } from "./notion.js";
+import { transformNotionItem } from "../functions/notion.js";
 
 test("轉換票券狀態與完整預定時間文字", () => {
   const item = transformNotionItem({
