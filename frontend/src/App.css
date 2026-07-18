@@ -377,3 +377,64 @@ h1 {
     border-radius: 14px;
   }
 }
+
+.ticket-status,
+.reservation-time {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ticket-status--reserved {
+  background: #ddf5e8;
+  color: #247352;
+}
+
+.ticket-status--not-reserved {
+  background: #ffe2e8;
+  color: #c64d68;
+}
+
+.ticket-status--walk-in {
+  background: #dff0ff;
+  color: #3979ad;
+}
+
+.ticket-status--unset {
+  background: #efedf0;
+  color: #756a70;
+}
+
+.reservation-time {
+  background: #fff0d9;
+  color: #9b651e;
+}
+
+.reservation-time.is-empty {
+  background: #f4eff1;
+  color: #85767d;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.state-card {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #8c7d84;
+  box-shadow: 0 8px 22px rgba(132, 92, 105, 0.1);
+  text-align: center;
+}
+
+.state-card--error {
+  background: #fff0f3;
+  color: #b64d67;
+}

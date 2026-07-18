@@ -1,24 +1,38 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { cachePage, getCachedPage } from "./pageCache.js";
+import {
+  EMPTY_DATE_LABEL,
+  formatTripDate,
+  getTicketStatusLabel,
+  getTicketStatusTone
+} from "./tripDisplay.js";
 
 function groupByDate(items) {
   return items.reduce((groups, item) => {
-    const date = item.date || "未分類";
+    const date = item?.date || EMPTY_DATE_LABEL;
     if (!groups[date]) groups[date] = [];
     groups[date].push(item);
     return groups;
   }, {});
 }
 
-function formatDate(dateText) {
-  if (dateText === "未分類") return "未分類";
-  const date = new Date(dateText);
-  return date.toLocaleDateString("zh-TW", {
-    month: "numeric",
-    day: "numeric",
-    weekday: "short"
-  });
+function TicketReservation({ status, reservationTime }) {
+  const tone = getTicketStatusTone(status);
+
+  return (
+    <>
+      <span className={`ticket-status ticket-status--${tone}`}>
+        🎟️ {getTicketStatusLabel(status)}
+      </span>
+
+      {status === "已預定" && (
+        <span className={`reservation-time ${reservationTime ? "" : "is-empty"}`}>
+          🕒 {reservationTime || "預定時間未設定"}
+        </span>
+      )}
+    </>
+  );
 }
 
 function App() {
@@ -29,18 +43,28 @@ function App() {
   const [previewImage, setPreviewImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     async function loadTrips() {
-      const res = await fetch("/.netlify/functions/notion");
-      const data = await res.json();
+      try {
+        const res = await fetch("/.netlify/functions/notion");
+        if (!res.ok) throw new Error(`行程 API 回傳 ${res.status}`);
 
-      setItems(data);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error("行程 API 格式不正確");
 
-      const dates = [...new Set(data.map(x => x.date || "未分類"))].sort();
-      setSelectedDate(dates[0] || "");
+        setItems(data);
 
-      setLoading(false);
+        const dates = [...new Set(data.map(x => x?.date || EMPTY_DATE_LABEL))].sort();
+        setSelectedDate(dates[0] || "");
+      } catch (error) {
+        console.error(error);
+        setItems([]);
+        setLoadError("行程載入失敗，請稍後再試");
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadTrips();
@@ -48,6 +72,12 @@ function App() {
 
   async function openItem(item) {
     setSelectedItem(item);
+
+    if (!item?.id) {
+      setPageContent([]);
+      setDetailLoading(false);
+      return;
+    }
 
     const cachedContent = getCachedPage(item.id);
     if (cachedContent) {
@@ -61,12 +91,18 @@ function App() {
 
     try {
       const res = await fetch(`/.netlify/functions/page?id=${item.id}`);
+      if (!res.ok) throw new Error(`筆記 API 回傳 ${res.status}`);
+
       const data = await res.json();
 
       // 兼容兩種格式：
       // 1. { pageId, content: [...] }
       // 2. [...]
-      const content = Array.isArray(data) ? data : data.content || [];
+      const content = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.content)
+          ? data.content
+          : [];
 
       cachePage(item.id, content);
       setPageContent(content);
@@ -86,7 +122,7 @@ function App() {
   const grouped = groupByDate(items);
   const dates = Object.keys(grouped).sort();
   const dayItems = [...(grouped[selectedDate] || [])]
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => (a?.order ?? 9999) - (b?.order ?? 9999));
 
   if (loading) {
     return (
@@ -118,7 +154,7 @@ function App() {
               setPageContent([]);
             }}
           >
-            <span>{formatDate(date)}</span>
+            <span>{formatTripDate(date)}</span>
             <small>{grouped[date].length} 項</small>
           </button>
         ))}
@@ -126,7 +162,13 @@ function App() {
 
       <section className="content">
         <div className="list">
-          <h2>{formatDate(selectedDate)} 行程</h2>
+          <h2>{formatTripDate(selectedDate)} 行程</h2>
+
+          {loadError && <div className="state-card state-card--error">{loadError}</div>}
+
+          {!loadError && dayItems.length === 0 && (
+            <div className="state-card">目前沒有可顯示的行程</div>
+          )}
 
           {dayItems.map(item => (
             <article
@@ -135,10 +177,14 @@ function App() {
               onClick={() => openItem(item)}
             >
               <div className="card-main">
-                <div className="card-title">{item.name}</div>
+                <div className="card-title">{item.name || "未命名行程"}</div>
 
                 <div className="card-meta">
                   {item.tag && <span className="tag">{item.tag}</span>}
+                  <TicketReservation
+                    status={item.ticketStatus}
+                    reservationTime={item.reservationTime}
+                  />
                   {item.mapUrl && (
                     <a
                       href={item.mapUrl}
@@ -170,9 +216,15 @@ function App() {
           {selectedItem && (
             <>
               <div className="detail-header">
-                <p className="detail-date">{formatDate(selectedItem.date || "未分類")}</p>
-                <h2>{selectedItem.name}</h2>
-                {selectedItem.tag && <span className="tag">{selectedItem.tag}</span>}
+                <p className="detail-date">{formatTripDate(selectedItem.date)}</p>
+                <h2>{selectedItem.name || "未命名行程"}</h2>
+                <div className="detail-meta">
+                  {selectedItem.tag && <span className="tag">{selectedItem.tag}</span>}
+                  <TicketReservation
+                    status={selectedItem.ticketStatus}
+                    reservationTime={selectedItem.reservationTime}
+                  />
+                </div>
               </div>
 
               {detailLoading && <p className="note">筆記載入中...</p>}
