@@ -18,19 +18,17 @@ function groupByDate(items) {
 }
 
 function TicketReservation({ status, reservationTime }) {
-  if (!status) return null;
-
-  const tone = getTicketStatusTone(status);
-
   return (
     <>
-      <span className={`ticket-status ticket-status--${tone}`}>
-        🎟️ {status}
-      </span>
+      {status && (
+        <span className={`ticket-status ticket-status--${getTicketStatusTone(status)}`}>
+          🎟️ {status}
+        </span>
+      )}
 
-      {status === "已預定" && (
-        <span className={`reservation-time ${reservationTime ? "" : "is-empty"}`}>
-          🕒 {reservationTime || "預定時間未設定"}
+      {reservationTime && (
+        <span className="reservation-time">
+          🕒 {reservationTime}
         </span>
       )}
     </>

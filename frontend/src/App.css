@@ -413,11 +413,6 @@ h1 {
   color: #9b651e;
 }
 
-.reservation-time.is-empty {
-  background: #f4eff1;
-  color: #85767d;
-}
-
 .detail-meta {
   display: flex;
   align-items: center;
