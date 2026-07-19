@@ -8,6 +8,7 @@ export function transformNotionItem(item = {}) {
 
   return {
     id: item?.id ?? "",
+    lastEditedTime: item?.last_edited_time ?? "",
     name: getPlainText(props.Name?.title) || "未命名行程",
     date: props.Time?.date?.start ?? "",
     tag: props["標籤"]?.select?.name ?? "",

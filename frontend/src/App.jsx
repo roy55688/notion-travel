@@ -79,7 +79,7 @@ function App() {
       return;
     }
 
-    const cachedContent = getCachedPage(item.id);
+    const cachedContent = getCachedPage(item.id, item.lastEditedTime);
     if (cachedContent) {
       setPageContent(cachedContent);
       setDetailLoading(false);
@@ -90,7 +90,11 @@ function App() {
     setPageContent([]);
 
     try {
-      const res = await fetch(`/.netlify/functions/page?id=${item.id}`);
+      const params = new URLSearchParams({
+        id: item.id,
+        edited: item.lastEditedTime || ""
+      });
+      const res = await fetch(`/.netlify/functions/page?${params}`);
       if (!res.ok) throw new Error(`筆記 API 回傳 ${res.status}`);
 
       const data = await res.json();
@@ -104,7 +108,7 @@ function App() {
           ? data.content
           : [];
 
-      cachePage(item.id, content);
+      cachePage(item.id, content, item.lastEditedTime);
       setPageContent(content);
     } catch (error) {
       console.error(error);

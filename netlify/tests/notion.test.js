@@ -5,6 +5,7 @@ import { transformNotionItem } from "../functions/notion.js";
 test("轉換票券狀態與完整預定時間文字", () => {
   const item = transformNotionItem({
     id: "trip-id",
+    last_edited_time: "2026-07-19T09:12:00.000Z",
     properties: {
       Name: { title: [{ plain_text: "景點" }] },
       Time: { date: { start: "2026-09-06" } },
@@ -20,11 +21,13 @@ test("轉換票券狀態與完整預定時間文字", () => {
 
   assert.equal(item.ticketStatus, "已預定");
   assert.equal(item.reservationTime, "19:00");
+  assert.equal(item.lastEditedTime, "2026-07-19T09:12:00.000Z");
 });
 
 test("缺少 Notion 屬性時提供安全預設值", () => {
   assert.deepEqual(transformNotionItem(), {
     id: "",
+    lastEditedTime: "",
     name: "未命名行程",
     date: "",
     tag: "",
