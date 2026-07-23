@@ -148,6 +148,13 @@ h1 {
   line-height: 1.45;
 }
 
+.card-annotation {
+  margin-top: 4px;
+  color: #8c7d84;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .card-meta {
   display: flex;
   align-items: center;

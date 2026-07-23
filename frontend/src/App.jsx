@@ -182,6 +182,9 @@ function App() {
             >
               <div className="card-main">
                 <div className="card-title">{item.name || "未命名行程"}</div>
+                {item.annotation && (
+                  <div className="card-annotation">{item.annotation}</div>
+                )}
 
                 <div className="card-meta">
                   {item.tag && <span className="tag">{item.tag}</span>}

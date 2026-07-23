@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { transformNotionItem } from "../functions/notion.js";
 
-test("轉換票券狀態與完整預定時間文字", () => {
+test("轉換票券狀態、預定時間與註解文字", () => {
   const item = transformNotionItem({
     id: "trip-id",
     last_edited_time: "2026-07-19T09:12:00.000Z",
@@ -15,12 +15,16 @@ test("轉換票券狀態與完整預定時間文字", () => {
       票券預定: { select: { name: "已預定" } },
       預定時間: {
         rich_text: [{ plain_text: "19" }, { plain_text: ":00" }]
+      },
+      註解: {
+        rich_text: [{ plain_text: "抵達後先寄放行李" }]
       }
     }
   });
 
   assert.equal(item.ticketStatus, "已預定");
   assert.equal(item.reservationTime, "19:00");
+  assert.equal(item.annotation, "抵達後先寄放行李");
   assert.equal(item.lastEditedTime, "2026-07-19T09:12:00.000Z");
 });
 
@@ -34,6 +38,7 @@ test("缺少 Notion 屬性時提供安全預設值", () => {
     order: 9999,
     mapUrl: "",
     ticketStatus: "",
-    reservationTime: ""
+    reservationTime: "",
+    annotation: ""
   });
 });

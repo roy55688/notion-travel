@@ -15,7 +15,8 @@ export function transformNotionItem(item = {}) {
     order: Number.isFinite(props.Order?.number) ? props.Order.number : 9999,
     mapUrl: props["google map連結"]?.url ?? "",
     ticketStatus: props["票券預定"]?.select?.name ?? "",
-    reservationTime: getPlainText(props["預定時間"]?.rich_text)
+    reservationTime: getPlainText(props["預定時間"]?.rich_text),
+    annotation: getPlainText(props["註解"]?.rich_text)
   };
 }
 
