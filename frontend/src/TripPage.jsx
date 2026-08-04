@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { cachePage, getCachedPage } from "./pageCache.js";
 import {
   EMPTY_DATE_LABEL,
@@ -43,6 +44,24 @@ function TripPage({ onShowShopping }) {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    if (!previewImage) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") setPreviewImage(null);
+    }
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [previewImage]);
 
   useEffect(() => {
     async function loadTrips() {
@@ -269,7 +288,7 @@ function TripPage({ onShowShopping }) {
         </aside>
       </section>
 
-      {previewImage && (
+      {previewImage && createPortal(
         <div className="image-modal" onClick={() => setPreviewImage(null)}>
           <button
             type="button"
@@ -294,7 +313,8 @@ function TripPage({ onShowShopping }) {
               {previewImage.caption}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </main>
   );
