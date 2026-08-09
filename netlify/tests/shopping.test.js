@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
+import shoppingHandler, {
   isPendingShoppingItem,
   transformShoppingItem
 } from "../functions/shopping.js";
@@ -52,4 +52,19 @@ test("缺少購物清單屬性時提供安全預設值", () => {
     shouldBuy: false,
     purchased: false
   });
+});
+
+test("未設定購買清單資料庫時回傳尚未啟用", async () => {
+  globalThis.Netlify = {
+    env: {
+      get: name => name === "NOTION_TOKEN" ? "test-token" : ""
+    }
+  };
+
+  try {
+    const response = await shoppingHandler();
+    assert.equal(response.status, 204);
+  } finally {
+    delete globalThis.Netlify;
+  }
 });

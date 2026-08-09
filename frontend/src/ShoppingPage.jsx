@@ -6,6 +6,7 @@ async function fetchShoppingItems() {
   const response = await fetch(`/.netlify/functions/shopping?refresh=${Date.now()}`, {
     cache: "no-store"
   });
+  if (response.status === 204) return null;
   if (!response.ok) throw new Error(`購物清單 API 回傳 ${response.status}`);
 
   const data = await response.json();
@@ -19,6 +20,7 @@ function ShoppingPage({ onShowTrips }) {
   const [expandedItemId, setExpandedItemId] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [configured, setConfigured] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -26,7 +28,8 @@ function ShoppingPage({ onShowTrips }) {
     fetchShoppingItems()
       .then(data => {
         if (!active) return;
-        setItems(data);
+        setConfigured(data !== null);
+        setItems(data ?? []);
       })
       .catch(error => {
         if (!active) return;
@@ -48,10 +51,11 @@ function ShoppingPage({ onShowTrips }) {
 
     try {
       const data = await fetchShoppingItems();
-      setItems(data);
+      setConfigured(data !== null);
+      setItems(data ?? []);
       setExpandedItemId("");
       setSelectedStoreType(current => {
-        const availableTypes = new Set(data.map(item => item?.storeType).filter(Boolean));
+        const availableTypes = new Set((data ?? []).map(item => item?.storeType).filter(Boolean));
         return current === ALL_STORE_TYPES || availableTypes.has(current)
           ? current
           : ALL_STORE_TYPES;
@@ -90,7 +94,7 @@ function ShoppingPage({ onShowTrips }) {
         </div>
       </header>
 
-      <section className="shopping-toolbar" aria-label="購物清單篩選與更新">
+      {configured && <section className="shopping-toolbar" aria-label="購物清單篩選與更新">
         <label className="store-filter">
           <span>商店類型</span>
           <select
@@ -116,12 +120,12 @@ function ShoppingPage({ onShowTrips }) {
           <span className={loading ? "refresh-icon refresh-icon--spinning" : "refresh-icon"}>↻</span>
           {loading ? "更新中" : "更新資料"}
         </button>
-      </section>
+      </section>}
 
       <section className="shopping-list" aria-live="polite" aria-busy={loading}>
         <div className="shopping-list-heading">
           <h2>{selectedStoreType}</h2>
-          {!loading && !loadError && <span>{visibleItems.length} 項待購買</span>}
+          {!loading && !loadError && configured && <span>{visibleItems.length} 項待購買</span>}
         </div>
 
         {loading && items.length === 0 && (
@@ -130,7 +134,13 @@ function ShoppingPage({ onShowTrips }) {
 
         {loadError && <div className="state-card state-card--error">{loadError}</div>}
 
-        {!loading && !loadError && visibleItems.length === 0 && (
+        {!loading && !loadError && !configured && (
+          <div className="state-card">
+            購買清單尚未啟用，完成 README 的選用設定後即可使用。
+          </div>
+        )}
+
+        {!loading && !loadError && configured && visibleItems.length === 0 && (
           <div className="state-card">這個分類目前沒有待購買商品</div>
         )}
 

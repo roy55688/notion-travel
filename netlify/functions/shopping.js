@@ -28,7 +28,14 @@ export default async () => {
     const databaseId = Netlify.env.get("NOTION_SHOPPINGLIST_DATABASE_ID");
     const token = Netlify.env.get("NOTION_TOKEN");
 
-    if (!databaseId || !token) {
+    if (!databaseId) {
+      return new Response(null, {
+        status: 204,
+        headers: { "Cache-Control": "no-store" }
+      });
+    }
+
+    if (!token) {
       throw new Error("Notion 購物清單環境變數尚未設定");
     }
 
