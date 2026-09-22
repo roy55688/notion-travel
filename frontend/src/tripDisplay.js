@@ -3,7 +3,10 @@ export const EMPTY_DATE_LABEL = "未分類";
 export function formatTripDate(dateText) {
   if (!dateText || dateText === EMPTY_DATE_LABEL) return EMPTY_DATE_LABEL;
 
-  const date = new Date(dateText);
+  const dateOnly = dateText.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const date = dateOnly
+    ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+    : new Date(dateText);
   if (Number.isNaN(date.getTime())) return EMPTY_DATE_LABEL;
 
   return date.toLocaleDateString("zh-TW", {

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import process from "node:process";
 import test from "node:test";
 import {
   formatTripDate,
@@ -15,6 +16,18 @@ test("票券狀態使用三種不同色系", () => {
 test("無效或缺少日期時顯示未分類", () => {
   assert.equal(formatTripDate(""), "未分類");
   assert.equal(formatTripDate("not-a-date"), "未分類");
+});
+
+test("純日期在加拿大時區不會往前偏移一天", () => {
+  const originalTimeZone = process.env.TZ;
+  process.env.TZ = "America/Vancouver";
+
+  try {
+    assert.equal(formatTripDate("2026-09-18"), "9/18（週五）");
+  } finally {
+    if (originalTimeZone === undefined) delete process.env.TZ;
+    else process.env.TZ = originalTimeZone;
+  }
 });
 
 test("依網址日期、今天、第一天的順序選擇初始行程", () => {
