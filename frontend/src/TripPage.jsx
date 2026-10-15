@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { cachePage, getCachedPage } from "./pageCache.js";
 import {
@@ -44,6 +44,15 @@ function TripPage({ onShowShopping }) {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 760px)").matches);
+  const detailRequest = useRef(0);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 760px)");
+    const updateLayout = event => setIsMobile(event.matches);
+    media.addEventListener("change", updateLayout);
+    return () => media.removeEventListener("change", updateLayout);
+  }, []);
 
   useEffect(() => {
     if (!previewImage) return undefined;
@@ -91,6 +100,14 @@ function TripPage({ onShowShopping }) {
   }, []);
 
   async function openItem(item) {
+    const request = ++detailRequest.current;
+    if (isMobile && selectedItem?.id === item.id) {
+      setSelectedItem(null);
+      setPageContent([]);
+      setDetailLoading(false);
+      return;
+    }
+
     setSelectedItem(item);
 
     if (!item?.id) {
@@ -125,12 +142,14 @@ function TripPage({ onShowShopping }) {
           : [];
 
       cachePage(item.id, content, item.lastEditedTime);
-      setPageContent(content);
+      if (request === detailRequest.current) setPageContent(content);
     } catch (error) {
       console.error(error);
-      setPageContent([{ type: "paragraph", text: "內容載入失敗" }]);
+      if (request === detailRequest.current) {
+        setPageContent([{ type: "paragraph", text: "內容載入失敗" }]);
+      }
     } finally {
-      setDetailLoading(false);
+      if (request === detailRequest.current) setDetailLoading(false);
     }
   }
 
@@ -138,6 +157,54 @@ function TripPage({ onShowShopping }) {
   const dates = Object.keys(grouped).sort();
   const dayItems = [...(grouped[selectedDate] || [])]
     .sort((a, b) => (a?.order ?? 9999) - (b?.order ?? 9999));
+
+  const detailContent = selectedItem && (
+    <>
+      {!isMobile && (
+        <div className="detail-header">
+          <p className="detail-date">{formatTripDate(selectedItem.date)}</p>
+          <h2>{selectedItem.name || "未命名行程"}</h2>
+          <div className="detail-meta">
+            {selectedItem.tag && <span className="tag">{selectedItem.tag}</span>}
+            <TicketReservation
+              status={selectedItem.ticketStatus}
+              reservationTime={selectedItem.reservationTime}
+            />
+          </div>
+        </div>
+      )}
+
+      {detailLoading && <p className="note" role="status">筆記載入中...</p>}
+
+      {!detailLoading && pageContent.length === 0 && (
+        <p className="note">這個項目目前沒有筆記內容</p>
+      )}
+
+      {!detailLoading && pageContent.map((block, index) => {
+        if (block.type === "paragraph") {
+          return block.text ? <p key={index} className="paragraph">{block.text}</p> : null;
+        }
+
+        if (block.type === "image" && block.url) {
+          return (
+            <figure key={index} className="image-block">
+              <button
+                type="button"
+                className="image-button"
+                aria-label={block.caption || "放大筆記圖片"}
+                onClick={() => setPreviewImage(block)}
+              >
+                <img src={block.url} alt={block.caption || ""} className="content-image" />
+              </button>
+              {block.caption && <figcaption>{block.caption}</figcaption>}
+            </figure>
+          );
+        }
+
+        return null;
+      })}
+    </>
+  );
 
   if (loading) {
     return (
@@ -169,9 +236,11 @@ function TripPage({ onShowShopping }) {
             key={date}
             className={date === selectedDate ? "active" : ""}
             onClick={() => {
+              detailRequest.current++;
               setSelectedDate(date);
               setSelectedItem(null);
               setPageContent([]);
+              setDetailLoading(false);
             }}
           >
             <span>{formatTripDate(date)}</span>
@@ -194,98 +263,67 @@ function TripPage({ onShowShopping }) {
             <article
               key={item.id}
               className={`card ${selectedItem?.id === item.id ? "selected" : ""}`}
-              onClick={() => openItem(item)}
             >
-              <div className="card-main">
-                <div className="card-title">{item.name || "未命名行程"}</div>
-                {item.annotation && (
-                  <div className="card-annotation">{item.annotation}</div>
-                )}
-
-                <div className="card-meta">
-                  {item.tag && <span className="tag">{item.tag}</span>}
-                  <TicketReservation
-                    status={item.ticketStatus}
-                    reservationTime={item.reservationTime}
-                  />
-                  {item.mapUrl && (
-                    <a
-                      href={item.mapUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={event => event.stopPropagation()}
-                    >
-                      🗺️ 地圖
-                    </a>
+              <div className="card-summary">
+                <div className="card-main">
+                  <div className="card-title" id={`trip-title-${item.id}`}>{item.name || "未命名行程"}</div>
+                  {item.annotation && (
+                    <div className="card-annotation">{item.annotation}</div>
                   )}
+
+                  <div className="card-meta">
+                    {item.tag && <span className="tag">{item.tag}</span>}
+                    <TicketReservation
+                      status={item.ticketStatus}
+                      reservationTime={item.reservationTime}
+                    />
+                    {item.mapUrl && (
+                      <a href={item.mapUrl} target="_blank" rel="noreferrer">
+                        🗺️ 地圖
+                      </a>
+                    )}
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  className="card-toggle"
+                  aria-labelledby={`trip-title-${item.id}`}
+                  aria-expanded={selectedItem?.id === item.id}
+                  aria-controls={isMobile ? `trip-note-${item.id}` : "trip-detail"}
+                  onClick={() => openItem(item)}
+                >
+                  <span className="card-arrow" aria-hidden="true">{isMobile ? "⌄" : "›"}</span>
+                </button>
               </div>
 
-              <div className="card-arrow">›</div>
+              {isMobile && (
+                <section
+                  className="trip-notes"
+                  id={`trip-note-${item.id}`}
+                  aria-labelledby={`trip-title-${item.id}`}
+                  aria-busy={detailLoading && selectedItem?.id === item.id}
+                  hidden={selectedItem?.id !== item.id}
+                >
+                  {selectedItem?.id === item.id && detailContent}
+                </section>
+              )}
             </article>
           ))}
         </div>
 
-        <aside className="detail">
+        {!isMobile && <aside className="detail" id="trip-detail" aria-busy={detailLoading}>
           {!selectedItem && (
             <div className="empty-detail">
               <div className="empty-emoji">🗺️</div>
               <p>
-                點選<span className="desktop-only">左側</span><span className="mobile-only">上方</span>的行程項目查看筆記
+                點選左側的行程項目查看筆記
               </p>
             </div>
           )}
 
-          {selectedItem && (
-            <>
-              <div className="detail-header">
-                <p className="detail-date">{formatTripDate(selectedItem.date)}</p>
-                <h2>{selectedItem.name || "未命名行程"}</h2>
-                <div className="detail-meta">
-                  {selectedItem.tag && <span className="tag">{selectedItem.tag}</span>}
-                  <TicketReservation
-                    status={selectedItem.ticketStatus}
-                    reservationTime={selectedItem.reservationTime}
-                  />
-                </div>
-              </div>
-
-              {detailLoading && <p className="note">筆記載入中...</p>}
-
-              {!detailLoading && pageContent.length === 0 && (
-                <p className="note">這個項目目前沒有筆記內容</p>
-              )}
-
-              {!detailLoading && pageContent.map((block, index) => {
-                if (block.type === "paragraph") {
-                  return block.text ? <p key={index} className="paragraph">{block.text}</p> : null;
-                }
-
-                if (block.type === "image" && block.url) {
-                  return (
-                    <figure key={index} className="image-block">
-                      <button
-                        type="button"
-                        className="image-button"
-                        onClick={() => setPreviewImage(block)}
-                      >
-                        <img
-                          src={block.url}
-                          alt={block.caption || ""}
-                          className="content-image"
-                        />
-                      </button>
-
-                      {block.caption && <figcaption>{block.caption}</figcaption>}
-                    </figure>
-                  );
-                }
-
-                return null;
-              })}
-            </>
-          )}
-        </aside>
+          {detailContent}
+        </aside>}
       </section>
 
       {previewImage && createPortal(

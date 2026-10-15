@@ -126,16 +126,49 @@ h1 {
 }
 
 .card {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
   padding: 16px;
   margin-bottom: 12px;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 8px 22px rgba(132, 92, 105, 0.12);
-  cursor: pointer;
   border: 2px solid transparent;
+}
+
+.card-summary {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-main {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card-toggle {
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.card-toggle::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+}
+
+.card-toggle:focus-visible {
+  outline: none;
+}
+
+.card-toggle:focus-visible::after {
+  outline: 3px solid rgba(143, 91, 206, 0.3);
+  outline-offset: 3px;
 }
 
 .card.selected {
@@ -175,13 +208,15 @@ h1 {
 }
 
 .card a {
+  position: relative;
+  z-index: 1;
   color: #4b91d9;
   font-weight: 700;
   text-decoration: none;
 }
 
 .card-arrow {
-  align-self: center;
+  display: inline-block;
   font-size: 28px;
   color: #d8a0b5;
 }
@@ -240,8 +275,16 @@ h1 {
   margin-bottom: 8px;
 }
 
-.mobile-only {
-  display: none;
+.trip-notes {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #f0bfd1;
+  overflow-wrap: anywhere;
+  animation: description-open 220ms ease both;
+}
+
+.trip-notes > :first-child {
+  margin-top: 0;
 }
 
 .loading-card {
@@ -255,14 +298,6 @@ h1 {
 }
 
 @media (max-width: 760px) {
-  .desktop-only {
-    display: none;
-  }
-
-  .mobile-only {
-    display: inline;
-  }
-
   .page {
     padding: 12px;
     overflow-x: hidden;
@@ -285,13 +320,12 @@ h1 {
     display: block;
   }
 
-  .detail {
-    position: static;
-    margin-top: 18px;
-  }
-
   .card {
     border-radius: 20px;
+  }
+
+  .card.selected .card-arrow {
+    transform: rotate(180deg);
   }
 }
 
@@ -765,6 +799,7 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .view-enter,
   .refresh-icon--spinning,
+  .trip-notes,
   .shopping-description {
     animation: none;
   }
